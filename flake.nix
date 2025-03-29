@@ -3,7 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    fork.url = "github:o3de/o3de";
+
+    fork = {
+    url = "github:o3de/o3de";
+    flake = false;
+    };
+
     flake-utils.url = "github:numtide/flake-utils";
   };
 
