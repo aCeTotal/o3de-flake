@@ -2,46 +2,55 @@
   description = "O3DE Game Engine flake with locked Python module and dependencies";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     pyproject-nix.url = "github:pyproject-nix/pyproject.nix/af4c3cc";
     flake-utils.url = "github:numtide/flake-utils";
-
-    fork = {
-      url = "github:aCeTotal/o3de/c9e5fa1";
-      flake = false;
-    };
   };
 
-  outputs = { self, nixpkgs, pyproject-nix, flake-utils, fork, ... }:
+  outputs = { self, nixpkgs, pyproject-nix, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
         python = pkgs.python311;
 
-        # Build the o3de-module
+        o3deSrc = pkgs.fetchgit {
+          url = "https://github.com/aCeTotal/o3de.git";
+          rev = "660b410";
+          sha256 = "sha256-660b4109970883ce7da9ea2ca82a29f217096921";
+          fetchLFS = true;
+        };
+
         o3dePythonLib = python.pkgs.buildPythonPackage {
           pname = "o3de";
-          version = "c9e5fa1";
+          version = "1.0.0";
           format = "setuptools";
-          src = "${fork}/scripts/o3de";
+          src = "${o3deSrc}/scripts/o3de";
           doCheck = false;
 
           propagatedBuildInputs = [ ];
 
-          meta.description = "O3DE editor Python bindings";
+          meta = {
+            description = "O3DE editor Python bindings";
+            homepage = "https://github.com/o3de/o3de";
+            license = pkgs.lib.licenses.asl20;
+          };
         };
 
-        # Creates an Python environment inc. the o3de-module
-        pythonEnv = python.withPackages (ps: [
-          o3dePythonLib
-          (import ./o3de-packages/python.nix { inherit pkgs python pyproject-nix; })
-        ]);
+        pythonEnv = python.withPackages (ps:
+          [
+            o3dePythonLib
+            (import ./o3de-packages/python.nix {
+              inherit pkgs python pyproject-nix;
+              fork = o3deSrc;
+            })
+          ]
+        );
 
       in {
         packages.default = pkgs.stdenv.mkDerivation {
           pname = "o3de";
           version = "dev";
-          src = fork;
+          src = o3deSrc;
 
           nativeBuildInputs = [
             pythonEnv
@@ -100,15 +109,22 @@
           ];
 
           configurePhase = ''
-            echo "Python version: $(python3 --version)"
-            cmake -B build -S . -GNinja
+            echo "🔧 Python version: $(python3 --version)"
+            export LY_3RDPARTY_PATH="$TMPDIR/fake-3rdparty"
+            mkdir -p "$LY_3RDPARTY_PATH"
+
+            cmake -B build/linux -S ${o3deSrc} \
+              -G "Ninja Multi-Config" \
+              -DLY_3RDPARTY_PATH="$LY_3RDPARTY_PATH"
           '';
 
-          buildPhase = "ninja -C build";
+          buildPhase = ''
+            cmake --build build/linux --target Editor --config profile -j$(nproc)
+          '';
 
           installPhase = ''
             mkdir -p $out
-            cp -r build/bin $out/
+            cp -r build/linux/bin/profile $out/
           '';
         };
 
@@ -122,7 +138,7 @@
           ];
 
           shellHook = ''
-            echo "O3DE devShell aktivert"
+            echo "✅ O3DE devShell aktivert"
             echo "Python: $(which python3)"
           '';
         };
