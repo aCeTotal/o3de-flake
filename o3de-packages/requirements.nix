@@ -12,12 +12,12 @@
   {
     pname = "boto3";
     version = "1.20.44";
-    sha256 = "26f18ca7411615f33d8d1bf60cc8efe5b331a57b3013d5f8f3587cd5350c27cb";
+    sha256 = "RHD2Tkr2Cf9ngFUzjJam98vmAdH7BqTqfcjZIjwuUno=";
   }
   {
     pname = "botocore";
     version = "1.23.44";
-    sha256 = "11483a493de4a76ef218d8cd3980c63550d006a0d082c10d53c0954184ca542a";
+    sha256 = "jlMX+E/BEYv/WPpvp5qbYgg+daKpxi/rPqc2lMVQuZ0=";
   }
   {
     pname = "certifi";
@@ -37,12 +37,12 @@
   {
     pname = "colorama";
     version = "0.4.3";
-    sha256 = "7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff";
+    sha256 = "6W2g0zB5Piy5SF6d39kY1FYDbHFJQWKVkyR4GS9ENqE=";
   }
   {
     pname = "docutils";
     version = "0.15.2";
-    sha256 = "6c4f696463b79f1fb8ba0c594b63840ebd41f059e92b31957c46b74a4599b6d0";
+    sha256 = "oq7qEpCI2kAmZekuCyWwSwc8BLLc5Ktlyqo4t84uGpk=";
   }
   {
     pname = "easyprocess";
@@ -52,7 +52,7 @@
   {
     pname = "exceptiongroup";
     version = "1.0.4";
-    sha256 = "542adf9dea4055530d6e1279602fa5cb11dab2395fa650b8674eaec35fc4a828";
+    sha256 = "vRSWe3nNm9tU2XMjIW+P31M+J435N6oqkAiefW4G5ew=";
   }
   {
     pname = "gitdb";
@@ -77,7 +77,7 @@
   {
     pname = "imageio";
     version = "2.8.0";
-    sha256 = "1e4ab29b3775bb093c7a35854a0412857145450183344678829b30e72263b001";
+    sha256 = "+1/W09FxJruqya8p/jQOLJehluuUFtTyjA5UN0ShUs8=";
   }
   {
     pname = "importlib-metadata";
@@ -92,7 +92,7 @@
   {
     pname = "jmespath";
     version = "0.9.5";
-    sha256 = "695cb76fa78a10663425d5b73ddc5714eb711157e52704d69be03b1a02ba4fec";
+    sha256 = "zKVcjRUxc+IbqlmYMBWtDa9gP5y3mZBP8Fe/uP+Nwtk=";
   }
   {
     pname = "MarkupSafe";
@@ -107,7 +107,7 @@
   {
     pname = "numpy";
     version = "1.23.0";
-    sha256 = "092f5e6025813e64ad6d1b52b519165d08c730d099c114a9247c9bb635a2a450";
+    sha256 = "vT+k/i44Uz1TNuEnL8TnZcq7veFEMJzO6GdVCdXNewU=";
   }
   {
     pname = "packaging";
@@ -132,7 +132,7 @@
   {
     pname = "psutil";
     version = "5.9.8";
-    sha256 = "02615ed8c5ea222323408ceba16c60e99c3f91639b07da6373fb7e6539abc56d";
+    sha256 = "a+Em4yJUht/yhqj7mgYkalJT9MfFO0depfWsk05kGUw=";
   }
   {
     pname = "pyparsing";
@@ -142,7 +142,7 @@
   {
     pname = "pyscreenshot";
     version = "0.6";
-    sha256 = "1af20739c754f7fa1e7f792c0c682fd89e30c9db4004252792830cc538727235";
+    sha256 = "cyKtlFRlKxcCo2iWRs5T7wHtKxSGnqVXAwvU4DoG/A4=";
   }
   {
     pname = "pytest-mock";
@@ -157,7 +157,7 @@
   {
     pname = "pytest";
     version = "7.2.0";
-    sha256 = "892f933d339f068883b6fd5a459f03d85bfcb355e4981e146d2c7616c21fef71";
+    sha256 = "xAFOtA4Q8R81WtTjwvssbG0ZGcc/O1pDPeRwggLK3lk=";
   }
   {
     pname = "python-dateutil";
@@ -167,12 +167,12 @@
   {
     pname = "python-utils";
     version = "2.5.6";
-    sha256 = "18fbc1a1df9a9061e3059a48ebe5c8a66b654d688b0e3ecca8b339a7f168f208";
+    sha256 = "NS1bH+vuv5s82588h6OybvItPJ4nSo7B5wSOzS+sQ0k=";
   }
   {
     pname = "requests";
     version = "2.31.0";
-    sha256 = "58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f";
+    sha256 = "lCxadY+Y15Dq7Ropy27vx/+w0c968Fw9J5Flbb1q0eE=";
   }
   {
     pname = "s3transfer";
@@ -212,7 +212,7 @@
   {
     pname = "iniconfig";
     version = "1.1.1";
-    sha256 = "011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3";
+    sha256 = "vDrwUdfRSy7l75lpZm3vDNGgAOEh6upYDUoxPfSzfzI=";
   }
   {
     pname = "toml";
