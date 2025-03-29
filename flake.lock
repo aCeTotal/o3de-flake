@@ -80,6 +80,7 @@
       },
       "original": {
         "owner": "pyproject-nix",
+        "ref": "af4c3cc",
         "repo": "pyproject.nix",
         "type": "github"
       }
