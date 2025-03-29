@@ -1,5 +1,5 @@
 {
-  description = "O3DE Game Engine flake with customizable source";
+  description = "O3DE Game Engine flake with locked Python module and dependencies";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -7,7 +7,7 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     fork = {
-      url = "github:o3de/o3de";
+      url = "github:aCeTotal/o3de/c9e5fa1";
       flake = false;
     };
   };
@@ -18,9 +18,25 @@
         pkgs = import nixpkgs { inherit system; };
         python = pkgs.python311;
 
-        pythonEnv = import ./o3de-packages/python.nix {
-          inherit pkgs python pyproject-nix;
+        # Build the o3de-module
+        o3dePythonLib = python.pkgs.buildPythonPackage {
+          pname = "o3de";
+          version = "c9e5fa1";
+          format = "setuptools";
+          src = "${fork}/scripts/o3de";
+          doCheck = false;
+
+          propagatedBuildInputs = [ ];
+
+          meta.description = "O3DE editor Python bindings";
         };
+
+        # Creates an Python environment inc. the o3de-module
+        pythonEnv = python.withPackages (ps: [
+          o3dePythonLib
+          (import ./o3de-packages/python.nix { inherit pkgs python pyproject-nix; })
+        ]);
+
       in {
         packages.default = pkgs.stdenv.mkDerivation {
           pname = "o3de";
@@ -106,7 +122,7 @@
           ];
 
           shellHook = ''
-            echo "✅ O3DE devShell aktivert"
+            echo "O3DE devShell aktivert"
             echo "Python: $(which python3)"
           '';
         };
