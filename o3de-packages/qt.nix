@@ -1,37 +1,35 @@
 { pkgs }:
 
-pkgs.stdenv.mkDerivation rec {
+let
+  qtTarball = pkgs.fetchurl {
+    url = "https://d3t6xeg4fgfoum.cloudfront.net/qt-5.15.2-rev9-linux.tar.xz";
+    sha256 = "20vNIAMmL02MfX2oMnWIJPwk5T2liV7e90P2emSlxzQ=";
+  };
+in
+
+pkgs.stdenv.mkDerivation {
   pname = "qt-5.15.2-rev9-linux";
   version = "5.15.2";
 
-  src = pkgs.fetchurl {
-    url = "https://d3t6xeg4fgfoum.cloudfront.net/${pname}.tar.xz";
-    sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # <-- Midlertidig placeholder
-  };
+  src = qtTarball;
 
-  nativeBuildInputs = [ pkgs.gnutar pkgs.xz ];
+  nativeBuildInputs = [ pkgs.xz pkgs.gnutar ];
 
   unpackPhase = ''
-    runHook preUnpack
-    mkdir -p $out/packages
-    tar -xf $src -C $out/packages
-    runHook postUnpack
+    mkdir source
+    tar -xJf ${qtTarball} -C source
   '';
 
-  buildPhase = ''
-    echo "📦 Innhold i pakken:"
-    find $out/packages/${pname} || true
+  installPhase = ''
+    mkdir -p $out/packages/qt-5.15.2-rev9-linux
+    cp -a source/. $out/packages/qt-5.15.2-rev9-linux
 
-    # Legg til hash.sha256 hvis den mangler
-    if [ ! -f "$out/packages/${pname}/hash.sha256" ]; then
-      echo "⚠️  Genererer manglende hash.sha256..."
-      (
-        cd $out/packages/${pname}
-        sha256sum 3rdPartyPackageManifest.json | cut -d' ' -f1 > hash.sha256
-      )
-    fi
+    # Flytt SHA256SUMS som "hash.sha256"
+    cp $out/packages/qt-5.15.2-rev9-linux/SHA256SUMS \
+       $out/packages/qt-5.15.2-rev9-linux/hash.sha256
+
+    # Lag stempelfil for å hindre nedlasting
+    touch $out/packages/qt-5.15.2-rev9-linux.stamp
   '';
-
-  installPhase = "true";
 }
 
