@@ -15,21 +15,21 @@ pkgs.stdenv.mkDerivation {
 
   nativeBuildInputs = [ pkgs.xz pkgs.gnutar ];
 
+  dontPatchShebangs = true;
+  dontFixup = true;
+
   unpackPhase = ''
-    mkdir source
+    mkdir source source-clean
     tar -xJf ${qtTarball} -C source
+    cp -r source/* source-clean/
+  '';
+
+  patchPhase = ''
   '';
 
   installPhase = ''
-    mkdir -p $out/packages/qt-5.15.2-rev9-linux
-    cp -a source/. $out/packages/qt-5.15.2-rev9-linux
-
-    # Flytt SHA256SUMS som "hash.sha256"
-    cp $out/packages/qt-5.15.2-rev9-linux/SHA256SUMS \
-       $out/packages/qt-5.15.2-rev9-linux/hash.sha256
-
-    # Lag stempelfil for å hindre nedlasting
-    touch $out/packages/qt-5.15.2-rev9-linux.stamp
+    mkdir -p $out/packages
+    cp -r source $out/packages/qt-5.15.2-rev9-linux
   '';
 }
 

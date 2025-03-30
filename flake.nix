@@ -22,6 +22,7 @@
 
         zlibPackage = import ./o3de-packages/zlib.nix { inherit pkgs; };
         qtPackage = import ./o3de-packages/qt.nix { inherit pkgs; };
+        pythonPackage = import ./o3de-packages/python-package.nix { inherit pkgs; };
 
         thirdPartyPath = pkgs.runCommand "o3de-3rdparty-path" { } ''
           mkdir -p $out/packages
@@ -30,11 +31,15 @@
           cp -r ${zlibPackage}/packages/zlib-* $out/packages/
 
           # Kopier Qt
-          cp -r ${qtPackage}/packages/qt-5.15.2-rev9-linux $out/packages/
+          cp -r ${qtPackage}/packages/qt-* $out/packages/
+
+          # Kopier Python
+          cp -r ${pythonPackage}/packages/python-* $out/packages/
 
           # Lag .stamp-filer
           touch $out/packages/zlib-1.2.11-rev5-linux.stamp
           touch $out/packages/qt-5.15.2-rev9-linux.stamp
+          touch $out/packages/python-3.10.13-rev2-linux.stamp
         '';
 
         o3dePythonLib = python.pkgs.buildPythonPackage {
@@ -79,6 +84,7 @@
               pythonEnv
               zlibPackage
               qtPackage
+              pythonPackage
 
               pkgs.clang
               pkgs.clang.cc
@@ -119,10 +125,16 @@
               mkdir -p "$HOME/.o3de"
               echo '{}' > "$HOME/.o3de/o3de_manifest.json"
 
+              mkdir -p "$HOME/.o3de/Python/packages"
+              cp -r "${pythonPackage}/packages/python-3.10.13-rev2-linux" "$HOME/.o3de/Python/packages/"
+              touch "$HOME/.o3de/Python/packages/python-3.10.13-rev2-linux.stamp"
+
               export LY_ROOT_FOLDER=$PWD
               export LY_3RDPARTY_PATH="${thirdPartyPath}"
+              export LY_PACKAGE_PATH="${thirdPartyPath}"
               export O3DE_SKIP_PACKAGE_SERVER_VALIDATION=1
               export LY_DISABLE_PACKAGE_DOWNLOADS=ON
+              export LY_PACKAGE_SERVER=
 
               echo "📦 Innhold i LY_3RDPARTY_PATH:"
               find "$LY_3RDPARTY_PATH" -type f
@@ -133,6 +145,7 @@
                 -DCMAKE_CXX_COMPILER=${pkgs.clang}/bin/clang++ \
                 -DLY_ROOT_FOLDER=$LY_ROOT_FOLDER \
                 -DLY_3RDPARTY_PATH=$LY_3RDPARTY_PATH \
+                -DLY_PACKAGE_PATH=$LY_PACKAGE_PATH \
                 -DBUILD_PREBUILT_PACKAGE_SUPPORT=OFF \
                 -DLY_DISABLE_PACKAGE_DOWNLOADS=ON \
                 -DLY_PACKAGE_VALIDATE_CONTENTS=ON \
@@ -152,6 +165,7 @@
 
           zlibPackage = zlibPackage;
           qtPackage = qtPackage;
+          pythonPackage = pythonPackage;
         };
 
         devShells.default = pkgs.mkShell {
@@ -164,7 +178,7 @@
           ];
 
           shellHook = ''
-            echo "O3DE devShell aktivert"
+            echo "✅ O3DE devShell aktivert"
             echo "Python: $(which python3)"
           '';
         };

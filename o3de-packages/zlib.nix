@@ -17,7 +17,7 @@ pkgs.stdenv.mkDerivation rec {
 
     tar -xf $src -C $pkgdir
 
-    echo "📦 Filer i $pkgdir:"
+    echo "Files in $pkgdir:"
     find $pkgdir
 
     # Lag hash.sha256 for O3DE-verifikasjon
