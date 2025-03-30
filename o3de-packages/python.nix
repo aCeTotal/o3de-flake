@@ -1,27 +1,17 @@
-{ pkgs, python, pyproject-nix }:
+{ pkgs, python, pyproject-nix, fork, ... }:
 
 let
-  # Source with Git LFS
-  o3deSrc = pkgs.fetchgit {
-    url = "https://github.com/aCeTotal/o3de.git";
-    rev = "a16c67a";
-    sha256 = "sha256-a16c67a735ea15a17ac1c45e83876255a5567955";
-    fetchLFS = true;
-  };
-
   # Parse requirements.txt via pyproject-nix
   project = pyproject-nix.lib.project.loadRequirementsTxt {
     requirements = builtins.readFile ./requirements.txt;
   };
 
-    # Builds the o3de-module from scripts/o3de
-    # https://github.com/aCeTotal/o3de/tree/development/scripts/o3de
-    # Make sure version matches setup.py
+  # Bygg o3de-modulen fra gitt kildekode (`fork`) via flake
   o3dePythonLib = python.pkgs.buildPythonPackage {
     pname = "o3de";
-    version = "1.0.0";
+    version = "1.0.0";  # Må matche setup.py i /scripts/o3de
     format = "setuptools";
-    src = "${o3deSrc}/scripts/o3de";
+    src = "${fork}/scripts/o3de";
 
     doCheck = false;
 
@@ -35,9 +25,9 @@ let
   };
 
 in
-# Combinds all requirements and the O3DE-module
-python.withPackages (ps:
-  (project.renderers.withPackages { inherit python; })(ps)
-  ++ [ o3dePythonLib ]
-)
+  # Kombinerer alle dependencies og o3de-modulen i ett python-miljø
+  python.withPackages (ps:
+    (project.renderers.withPackages { inherit python; })(ps)
+    ++ [ o3dePythonLib ]
+  )
 

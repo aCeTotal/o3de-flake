@@ -12,13 +12,17 @@
       let
         pkgs = import nixpkgs { inherit system; };
         python = pkgs.python311;
+        lib = pkgs.lib;
 
         o3deSrc = pkgs.fetchgit {
           url = "https://github.com/aCeTotal/o3de.git";
           rev = "660b410";
-          sha256 = "sha256-660b4109970883ce7da9ea2ca82a29f217096921";
+          sha256 = "sha256-AVF5d8dX/obn35xrFBZNItRlHCCFuF8nEPOfX1JuOpY=";
           fetchLFS = true;
         };
+
+        zlibPackage = import ./o3de-packages/zlib.nix { inherit pkgs; };
+        qtPackage = import ./packages/qt.nix { inherit pkgs; };
 
         o3dePythonLib = python.pkgs.buildPythonPackage {
           pname = "o3de";
@@ -26,9 +30,7 @@
           format = "setuptools";
           src = "${o3deSrc}/scripts/o3de";
           doCheck = false;
-
           propagatedBuildInputs = [ ];
-
           meta = {
             description = "O3DE editor Python bindings";
             homepage = "https://github.com/o3de/o3de";
@@ -36,96 +38,105 @@
           };
         };
 
-        pythonEnv = python.withPackages (ps:
-          [
-            o3dePythonLib
-            (import ./o3de-packages/python.nix {
-              inherit pkgs python pyproject-nix;
-              fork = o3deSrc;
-            })
-          ]
-        );
+        pythonEnv = python.withPackages (ps: [
+          o3dePythonLib
+          (import ./o3de-packages/python.nix {
+            inherit pkgs python pyproject-nix;
+            fork = o3deSrc;
+          })
+        ]);
 
       in {
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "o3de";
-          version = "dev";
-          src = o3deSrc;
+        packages = {
+          default = pkgs.stdenv.mkDerivation {
+            pname = "o3de";
+            version = "dev";
+            src = o3deSrc;
 
-          nativeBuildInputs = [
-            pythonEnv
-            pkgs.cmake
-            pkgs.ninja
-            pkgs.git
-            pkgs.pkg-config
-          ];
+            nativeBuildInputs = [
+              pythonEnv
+              pkgs.cmake
+              pkgs.clang
+              pkgs.ninja
+              pkgs.git
+              pkgs.pkg-config
+            ];
 
-          buildInputs = [
-            pythonEnv
-            pkgs.clang_16
-            pkgs.libstdcxx-12
-            pkgs.vulkan-loader
-            pkgs.vulkan-headers
-            pkgs.mesa
-            pkgs.libGL
-            pkgs.libunwind
-            pkgs.zlib
-            pkgs.zstd
+            buildInputs = [
+              pythonEnv
+              zlibPackage
+              qtPackage
 
-            pkgs.xorg.libX11
-            pkgs.xorg.libXcursor
-            pkgs.xorg.libXi
-            pkgs.xorg.libXrandr
-            pkgs.xorg.libXxf86vm
-            pkgs.xorg.libXinerama
-            pkgs.xorg.libXrender
+              pkgs.clang
+              pkgs.clang.cc
+              pkgs.clang_16
+              pkgs.gcc12.cc.lib
+              pkgs.vulkan-loader
+              pkgs.vulkan-headers
+              pkgs.mesa
+              pkgs.libGL
+              pkgs.libunwind
+              pkgs.zstd
 
-            pkgs.libxkbcommon
-            pkgs.libxkbcommon.dev
-            pkgs.libxkbcommon-x11
-            pkgs.libxkbcommon-x11.dev
+              pkgs.xorg.libX11
+              pkgs.xorg.libXcursor
+              pkgs.xorg.libXi
+              pkgs.xorg.libXrandr
+              pkgs.xorg.libXxf86vm
+              pkgs.xorg.libXinerama
+              pkgs.xorg.libXrender
 
-            pkgs.xcbutil
-            pkgs.xcbutilkeysyms
-            pkgs.xcbutilwm
-            pkgs.xcbutilimage
-            pkgs.xcbutilcursor
+              pkgs.libxkbcommon
 
-            pkgs.xorg.libxcb
-            pkgs.xorg.libxcb.dev
-            pkgs.xorg.libxcb.lib
-            pkgs.xorg.libxcb.out
+              pkgs.xorg.xcbutil
+              pkgs.xorg.xcbutilkeysyms
+              pkgs.xorg.xcbutilwm
+              pkgs.xorg.xcbutilimage
+              pkgs.xcb-util-cursor
 
-            pkgs.xorg.libxcbRandr
-            pkgs.xorg.libxcbXinerama
-            pkgs.xorg.libxcbXinput
-            pkgs.xorg.libxcbXfixes
+              pkgs.xorg.libxcb
 
-            pkgs.fontconfig
-            pkgs.pcre2
-            pkgs.tcl
-            pkgs.tk
-            pkgs.tclPackages.tix
-          ];
+              pkgs.fontconfig
+              pkgs.pcre2
+              pkgs.tcl
+              pkgs.tk
+              pkgs.tclPackages.tix
+            ];
 
-          configurePhase = ''
-            echo "🔧 Python version: $(python3 --version)"
-            export LY_3RDPARTY_PATH="$TMPDIR/fake-3rdparty"
-            mkdir -p "$LY_3RDPARTY_PATH"
+                        configurePhase = ''
+  echo "🔧 Python version: $(python3 --version)"
+  export HOME=$TMPDIR/home
+  mkdir -p "$HOME/.o3de"
+  echo '{}' > "$HOME/.o3de/o3de_manifest.json"
 
-            cmake -B build/linux -S ${o3deSrc} \
-              -G "Ninja Multi-Config" \
-              -DLY_3RDPARTY_PATH="$LY_3RDPARTY_PATH"
-          '';
+  export LY_ROOT_FOLDER=$PWD
+  export LY_3RDPARTY_PATH=${zlibPackage}:${qtPackage}
 
-          buildPhase = ''
-            cmake --build build/linux --target Editor --config profile -j$(nproc)
-          '';
+  ls -R $LY_3RDPARTY_PATH
 
-          installPhase = ''
-            mkdir -p $out
-            cp -r build/linux/bin/profile $out/
-          '';
+  cmake -B build/linux -S $LY_ROOT_FOLDER \
+  -G "Ninja Multi-Config" \
+  -DCMAKE_C_COMPILER=${pkgs.clang}/bin/clang \
+  -DCMAKE_CXX_COMPILER=${pkgs.clang}/bin/clang++ \
+  -DLY_ROOT_FOLDER=$LY_ROOT_FOLDER \
+  -DLY_3RDPARTY_PATH=$LY_3RDPARTY_PATH \
+  -DBUILD_PREBUILT_PACKAGE_SUPPORT=OFF \
+  -DLY_DISABLE_PACKAGE_DOWNLOADS=ON \
+  -DLY_UNITY_BUILD=OFF \
+  -DLY_PACKAGE_DEBUG=ON
+                        '';
+                                    
+            buildPhase = ''
+              cmake --build build/linux --target Editor --config profile -j$(nproc)
+            '';
+
+            installPhase = ''
+              mkdir -p $out
+              cp -r build/linux/bin/profile $out/
+            '';
+          };
+
+          zlibPackage = zlibPackage;
         };
 
         devShells.default = pkgs.mkShell {
