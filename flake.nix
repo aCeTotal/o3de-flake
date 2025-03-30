@@ -29,10 +29,10 @@
           # Kopier Zlib
           cp -r ${zlibPackage}/packages/zlib-* $out/packages/
 
-          # Kopier Qt (riktig struktur forventet fra qt.nix)
+          # Kopier Qt
           cp -r ${qtPackage}/packages/qt-5.15.2-rev9-linux $out/packages/
 
-          # Lag nødvendige stempelfiler
+          # Lag .stamp-filer
           touch $out/packages/zlib-1.2.11-rev5-linux.stamp
           touch $out/packages/qt-5.15.2-rev9-linux.stamp
         '';
@@ -151,6 +151,7 @@
           };
 
           zlibPackage = zlibPackage;
+          qtPackage = qtPackage;
         };
 
         devShells.default = pkgs.mkShell {
@@ -163,7 +164,7 @@
           ];
 
           shellHook = ''
-            echo "✅ O3DE devShell aktivert"
+            echo "O3DE devShell aktivert"
             echo "Python: $(which python3)"
           '';
         };
